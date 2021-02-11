@@ -39,6 +39,9 @@ def list_photos_filter(inp_pc_ip, inp_pc_path, inp_list_photos):
 
 # используем scp для отобранных файлов, полученных на предыдущем шаге
 def send_list(inp_pc_ip, inp_pc_path, inp_list_photos):
+    if len(inp_list_photos) == 0:
+        print('шаг 4 отменен, нечего отправлять')
+        return
     files = ' '.join(list(map(lambda x: '"'+x['full']+'"', inp_list_photos)))
     sshout = os.popen(f"scp {files} {inp_pc_ip}:{inp_pc_path}/inbox/").read().strip()
     print('шаг 4 (отправка): ' + repr(sshout))
