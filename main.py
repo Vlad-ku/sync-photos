@@ -2,14 +2,15 @@ import os
 import conf
 
 #
-#  после копирования убрать 'conf' вначале
+#  для работы необходимо создать файл conf.py со следующим содержимым
+#  *после копирования убрать 'conf' вначале
 #
 #  conf.phone_path = '/fo/bar'
-#  conf.pc_ip      = '192.168.0.1'
+#  conf.pc_ip      = 'user@192.168.0.1'
 #  conf.pc_path    = '/fo/bar'
 #
 
-# получаем список файлов с телефона (полный путь + только имя)
+# получаем список файлов на телефоне (запись включает: полный путь и только имя)
 def list_photos(inp_phone_path):
     list_photos = []
     for current_dir, dirs, files in os.walk(inp_phone_path):
@@ -17,7 +18,7 @@ def list_photos(inp_phone_path):
             list_photos.append({'full': current_dir+'/'+file, 'name': file})
     return list_photos
 
-# проверяем на предмет коллизий имен (сможем ли однозначно сопоставить имя и полный путь)
+# проверяем на предмет коллизий имен (True - есть коллизия, и просто так сопоставить пути и имена не сможем)
 def list_photos_conflict(inp_list_photos):
     for photo1 in inp_list_photos:
         count = 0
@@ -28,7 +29,7 @@ def list_photos_conflict(inp_list_photos):
             return True
     return False
 
-# ssh - запросить список файлов на сервере и выбрать из нашего списка те, которых на сервере нет
+# запрашиваем список файлов на сервере и выбираем из нашего списка те файлы, которых на сервере нет
 def list_photos_filter(inp_pc_ip, inp_pc_path, inp_list_photos):
     sshout = os.popen(f"ssh {inp_pc_ip} -t \"find '{inp_pc_path}' -exec basename '{{}}' ';'\"").read().strip()
     sshout = sshout.split('\n')
@@ -36,7 +37,7 @@ def list_photos_filter(inp_pc_ip, inp_pc_path, inp_list_photos):
     print('шаг 3 (сверка): ' + repr(ret))
     return ret
 
-# ssh - scp всех имен, полученных на предыдущем шаге
+# используем scp для отобранных файлов, полученных на предыдущем шаге
 def send_list(inp_pc_ip, inp_pc_path, inp_list_photos):
     files = ' '.join(list(map(lambda x: '"'+x['full']+'"', inp_list_photos)))
     sshout = os.popen(f"scp {files} {inp_pc_ip}:{inp_pc_path}/inbox/").read().strip()
