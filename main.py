@@ -32,7 +32,7 @@ def list_photos_conflict(inp_list_photos):
 def list_photos_filter(inp_pc_ip, inp_pc_path, inp_list_photos):
     sshout = os.popen(f"ssh {inp_pc_ip} -t \"find '{inp_pc_path}' -exec basename '{{}}' ';'\"").read().strip()
     sshout = sshout.split('\n')
-    ret = list(filter(lambda x: x['name'] not in sshout))
+    ret = list(filter(lambda x: x['name'] not in sshout, inp_list_photos))
     print('шаг 3 (сверка): ' + repr(ret))
     return ret
 
